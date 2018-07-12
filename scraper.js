@@ -12,8 +12,9 @@ JSON2csv: https://www.npmjs.com/package/json2csv
 const fs = require('fs');
 const request = require('request');
 const cheerio = require('cheerio');
-const Json2csvTransform = require('json2csv').Transform;
 const Json2csvParser = require('json2csv').Parser;
+//Require http module for status codes
+const http = require('http');
 
 //check for the existance of a file
 if (!fs.existsSync('./data')) {
@@ -24,17 +25,10 @@ let body;
 //stores shirt links
 const links = [];
 
-request
-  .get('http://shirts4mike.com/shirts.php')
-  .on('data', function(data) {
-    body += data;
-  })
-  .on('end', function() {
-      let resp = JSON.parse(JSON.stringify(body));
-      let $ = cheerio.load(resp);
-
-      const products = $('.products li');
-      
+request('http://shirts4mike.com/shirts.php', function(error, response, body) {
+    if (!error && response.statusCode === 200) {
+        let $ = cheerio.load(body);
+        const products = $('.products li');      
 
       $(products).each(function() {
           let url = $(this).children().first().attr('href');
@@ -42,7 +36,12 @@ request
       });      
 
       getShirtData(links);
-  });
+    } else {
+        const message = `The following error occurred ${http.STATUS_CODES[response.statusCode]}`;
+        const statusCodeError = new Error(message);
+        printError(statusCodeError);
+    }
+});
 
   function getShirtData(links) {
       let i = 0;  
@@ -50,15 +49,9 @@ request
 
       function next() {
           if (i < links.length) {
-            let shirtBody;
-              request
-                .get(`http://shirts4mike.com/${links[i]}`)
-                .on('data', function(data) {
-                     shirtBody += data;
-                })
-                .on('end', function() {
-                    let resp = JSON.parse(JSON.stringify(shirtBody));
-                    let $ = cheerio.load(resp);
+              request(`http://shirts4mike.com/${links[i]}`, function(error, response, body) {
+                  if(!error && response.statusCode === 200) {
+                    let $ = cheerio.load(body);
 
                     let price = $('.price').text();
                     price = parseInt(price.replace(/[^0-9\.]+/g, ""));
@@ -71,8 +64,13 @@ request
                     shirtData.push({title, price, imgUrl, url, time});
                     i++;
                     return next();
-                })
-          } else {
+                   } else {
+                    const message = "The following error occurred " + http.STATUS_CODES[response.statusCode];
+                    const statusCodeError = new Error(message);
+                    printError(statusCodeError);
+                  }
+            }//end response function 
+        } else {
             
             const fields = ['title', 'price', 'imageURL', 'url', 'time'];
             const json2csvParser = new Json2csvParser({ fields });
@@ -81,19 +79,16 @@ request
             console.log(csv);
             const currentDate = new Date();
             const fileName = `${currentDate.getFullYear()}-${currentDate.getMonth()}-${currentDate.getDay()}`;
+            const filePath = `./data/${fileName}`;
 
-            fs.writeFileSync(`./data/${fileName}`, csv);
-
-            
-          }
+            fs.writeFileSync(filePath, csv);            
+        }
       }//end next();      
       return next();
   }
 
-
-
-//start the data request
-//read the data from the site
-//listen for the end of the data
-//parse the data
-//write the data to a csv file
+//error handling
+//Print Error Messages
+function printError(error) {
+    console.error(error.message);
+  }
