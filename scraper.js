@@ -37,20 +37,26 @@ request('http://shirts4mike.com/shirts.php', function(error, response, body) {
 
       getShirtData(links);
     } else {
-        const message = `The following error occurred ${http.STATUS_CODES[response.statusCode]}`;
-        const statusCodeError = new Error(message);
-        printError(statusCodeError);
+        if (response) {
+            const message = "The following error occurred " + http.STATUS_CODES[response.statusCode];
+            const statusCodeError = new Error(message);
+            printError(statusCodeError);
+        } else {
+            const message = `The following error occurred: ${error.code} (${error.message})`;
+            const statusCodeError = new Error(message);
+            printError(statusCodeError);
+        }
     }
 });
 
-  function getShirtData(links) {
-      let i = 0;  
-      let shirtData = [];
+function getShirtData(links) {
+    let i = 0;  
+    let shirtData = [];
 
-      function next() {
-          if (i < links.length) {
-              request(`http://shirts4mike.com/${links[i]}`, function(error, response, body) {
-                  if(!error && response.statusCode === 200) {
+    function next() {
+        if (i < links.length) {
+            request(`http://shirts4mike.com/${links[i]}`, function(error, response, body) {
+                if(!error && response.statusCode === 200) {
                     let $ = cheerio.load(body);
 
                     let price = $('.price').text();
@@ -64,14 +70,20 @@ request('http://shirts4mike.com/shirts.php', function(error, response, body) {
                     shirtData.push({title, price, imgUrl, url, time});
                     i++;
                     return next();
-                   } else {
-                    const message = "The following error occurred " + http.STATUS_CODES[response.statusCode];
-                    const statusCodeError = new Error(message);
-                    printError(statusCodeError);
-                  }
-            }//end response function 
+                } else {
+                    if (response) {
+                        const message = "The following error occurred " + http.STATUS_CODES[response.statusCode];
+                        const statusCodeError = new Error(message);
+                        printError(statusCodeError);
+                    } else {
+                        const message = `The following error occurred: ${error.code} (${error.message})`;
+                        const statusCodeError = new Error(message);
+                        printError(statusCodeError);
+                    }   
+                }
+            });
+
         } else {
-            
             const fields = ['title', 'price', 'imageURL', 'url', 'time'];
             const json2csvParser = new Json2csvParser({ fields });
             const csv = json2csvParser.parse(shirtData);
@@ -81,13 +93,13 @@ request('http://shirts4mike.com/shirts.php', function(error, response, body) {
             const fileName = `${currentDate.getFullYear()}-${currentDate.getMonth()}-${currentDate.getDay()}`;
             const filePath = `./data/${fileName}`;
 
-            fs.writeFileSync(filePath, csv);            
+            fs.writeFileSync(filePath, csv); 
         }
-      }//end next();      
-      return next();
-  }
-
-//error handling
+    }
+    return next();
+}
+  
+  //error handling
 //Print Error Messages
 function printError(error) {
     console.error(error.message);
