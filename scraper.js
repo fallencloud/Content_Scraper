@@ -1,10 +1,9 @@
 /*
 Date 7/10/2018
 Author: Sharina V. Jones
-Crawler Site: https://www.npmjs.com/package/crawler
-Cherio: https://www.npmjs.com/package/cheerio
-Fetch: https://www.npmjs.com/package/node-fetch
-https://www.npmjs.com/package/request
+Crawler Site: https://www.npmjs.com/package/request
+Cheerio: https://www.npmjs.com/package/cheerio
+JSON2csv: https://www.npmjs.com/package/json2csv
 */
 
 
@@ -12,8 +11,9 @@ https://www.npmjs.com/package/request
 //import required files
 const fs = require('fs');
 const request = require('request');
-const rp = require('request-promise');
 const cheerio = require('cheerio');
+const Json2csvTransform = require('json2csv').Transform;
+const Json2csvParser = require('json2csv').Parser;
 
 //check for the existance of a file
 if (!fs.existsSync('./data')) {
@@ -45,8 +45,7 @@ request
   });
 
   function getShirtData(links) {
-      let i = 0;
-      
+      let i = 0;  
       let shirtData = [];
 
       function next() {
@@ -66,18 +65,32 @@ request
                     let title = $('.shirt-picture span img').attr("alt");
                     let url = `https://shirts4mike.com/${links[i]}`;
                     let imgUrl = $('.shirt-picture img').attr('src');
+                    let time = new Date();
+                    time = time.getTime();
 
-                    shirtData.push({price, title, url, imgUrl});
+                    shirtData.push({title, price, imgUrl, url, time});
                     i++;
                     return next();
                 })
           } else {
-              console.log(shirtData);
-              console.log(shirtData.length);
+            
+            const fields = ['title', 'price', 'imageURL', 'url', 'time'];
+            const json2csvParser = new Json2csvParser({ fields });
+            const csv = json2csvParser.parse(shirtData);
+            
+            console.log(csv);
+            const currentDate = new Date();
+            const fileName = `${currentDate.getFullYear()}-${currentDate.getMonth()}-${currentDate.getDay()}`;
+
+            fs.writeFileSync(`./data/${fileName}`, csv);
+
+            
           }
       }//end next();      
       return next();
   }
+
+
 
 //start the data request
 //read the data from the site
