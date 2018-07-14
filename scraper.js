@@ -17,6 +17,7 @@ const Json2csvParser = require('json2csv').Parser;
 //Require http module for status codes
 const http = require('http');
 
+
 //check for the existance of a file
   //creates file if it doesn't exist
 if (!fs.existsSync('./data')) {
@@ -75,10 +76,10 @@ function getShirtData(links) {
                     let url = `https://shirts4mike.com/${links[i]}`;
                     let imgUrl = $('.shirt-picture img').attr('src');
                     let time = new Date();
-                    time = time.getTime();
-
+                    time = time.getTime();                    
                     shirtData.push({title, price, imgUrl, url, time});
                     i++;
+                    process.stdout.write('.');
                     return next();
                 } else {
                     if (response) {
@@ -92,14 +93,17 @@ function getShirtData(links) {
             });
 
         } else {
+            console.log(`✅\tProgram complete`);
             //parses shirt info into csv
             const fields = ['title', 'price', 'imageURL', 'url', 'time'];
             const json2csvParser = new Json2csvParser({ fields });
             const csv = json2csvParser.parse(shirtData);
             
             //creates a filename using the current day
-            const currentDate = new Date();
-            const fileName = `${currentDate.getFullYear()}-${currentDate.getMonth()}-${currentDate.getDay()}`;
+            //[year, month, day, hour, minute, second, millisecond]
+            let currentDate = new Date(Date.now());
+            currentDate = currentDate.toISOString().substr(0, 10);            
+            const fileName = `${currentDate}.csv`;
             const filePath = `./data/${fileName}`;
 
             //writes to a file
