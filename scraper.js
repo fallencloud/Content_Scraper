@@ -17,6 +17,9 @@ const Json2csvParser = require('json2csv').Parser;
 //Require http module for status codes
 const http = require('http');
 
+//declartions
+let shirtData = [];
+
 
 //check for the existance of a file
   //creates file if it doesn't exist
@@ -60,8 +63,8 @@ request(entrance, function(error, response, body) {
 //second scrape
   //gets info from individual shirts
 function getShirtData(links) {
-    let i = 0;  
-    let shirtData = [];
+    let i = 0; 
+    
 
     //recursively calls itself until each shirt's info is obtained
     function next() {
@@ -93,7 +96,7 @@ function getShirtData(links) {
             });
 
         } else {
-            console.log(`✅\tProgram complete`);
+            console.log(`✅\tProgram complete`);            
             //parses shirt info into csv
             const fields = ['title', 'price', 'imageURL', 'url', 'time'];
             const json2csvParser = new Json2csvParser({ fields });
@@ -119,3 +122,5 @@ function getShirtData(links) {
 function printError(error) {
     console.error(error.message);
   }
+
+  module.exports.shirtData = shirtData;
