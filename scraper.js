@@ -96,9 +96,10 @@ function getShirtData(links) {
             });
 
         } else {
+            console.log(shirtData);
             console.log(`✅\tProgram complete`);            
             //parses shirt info into csv
-            const fields = ['title', 'price', 'imageURL', 'url', 'time'];
+            const fields = ['title', 'price', 'imgUrl', 'url', 'time'];
             const json2csvParser = new Json2csvParser({ fields });
             const csv = json2csvParser.parse(shirtData);
             
