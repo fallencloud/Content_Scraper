@@ -127,9 +127,5 @@ function printError(error) {
 function dataToJSON(shirtData) {
     const toJSON = JSON.stringify(shirtData);
     const toObj = JSON.parse(toJSON);
-    fs.writeFile('./data/shirts.json', toJSON, (err) => {
-        if (err) {
-            console.error('Unable to write to file');
-        }
-    });
+    fs.writeFileSync('./data/shirts.json', toJSON);
 }
