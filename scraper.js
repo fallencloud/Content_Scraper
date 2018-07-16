@@ -96,7 +96,6 @@ function getShirtData(links) {
             });
 
         } else {
-            console.log(shirtData);
             console.log(`✅\tProgram complete`);            
             //parses shirt info into csv
             const fields = ['title', 'price', 'imgUrl', 'url', 'time'];
@@ -112,7 +111,8 @@ function getShirtData(links) {
 
             //writes to a file
               //creates file if it doesn't exist
-            fs.writeFileSync(filePath, csv); 
+            fs.writeFileSync(filePath, csv);
+            dataToJSON(shirtData);                       
         }
     }
     return next();
@@ -124,4 +124,12 @@ function printError(error) {
     console.error(error.message);
   }
 
-  module.exports.shirtData = shirtData;
+function dataToJSON(shirtData) {
+    const toJSON = JSON.stringify(shirtData);
+    const toObj = JSON.parse(toJSON);
+    fs.writeFile('./data/shirts.json', toJSON, (err) => {
+        if (err) {
+            console.error('Unable to write to file');
+        }
+    });
+}
