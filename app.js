@@ -1,4 +1,4 @@
-const {shirts} = require('./data/shirts.json');
+const shirts = require('./data/shirts.json');
 const express = require('express');
 
 const app = express();

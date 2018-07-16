@@ -76,7 +76,7 @@ function getShirtData(links) {
                     let price = $('.price').text();
                     price = parseInt(price.replace(/[^0-9\.]+/g, ""));
                     let title = $('.shirt-picture span img').attr("alt");
-                    let url = `https://shirts4mike.com/${links[i]}`;
+                    let url = `http://shirts4mike.com/${links[i]}`;
                     let imgUrl = $('.shirt-picture img').attr('src');
                     let time = new Date();
                     time = time.getTime();                    

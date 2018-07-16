@@ -26,11 +26,11 @@ html(lang='en')
         each shirt in shirts
           .col-md-6
             .card
-              img.card-img-top(src=`shirts4mike.com/${shirt.imgUrl}`, alt='Card image cap')
+              img.card-img-top(src=`http://shirts4mike.com/${shirt.imgUrl}`, alt='Card image cap')
               .card-body
                 h5.card-title #{shirt.title}
                 p.card-text #{shirt.price}
-                a.btn.btn-primary(href=`${shirt.url}`) View Shirt
+                a.btn.btn-primary(href=`${shirt.url}` target="_blank") View Shirt
 
     // Optional JavaScript
     // jQuery first, then Popper.js, then Bootstrap JS
